@@ -45,6 +45,8 @@ export default async function DashboardPage() {
     const totalSalesCount = incomingOrders.length;
     const totalRevenue = incomingOrders.reduce((acc, order) => acc + order.amount, 0);
 
+
+
     return (
         <div className="container py-10">
             <h1 className="mb-8 text-3xl font-bold">Dashboard</h1>
@@ -85,6 +87,8 @@ export default async function DashboardPage() {
                         </Card>
                     </div>
 
+
+
                     {/* Incoming Orders Table */}
                     <div>
                         <h2 className="mb-4 text-xl font-semibold">Incoming Orders</h2>
@@ -98,10 +102,28 @@ export default async function DashboardPage() {
                                             <div>
                                                 <p className="font-bold">{order.food.title}</p>
                                                 <p className="text-sm text-muted-foreground">Ordered by a User</p>
+                                                <p className="font-bold">{order.food.title}</p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Quantity: {order.quantity}
+                                                </p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Address: {order.address}
+                                                </p>
+                                                <p className="text-xs font-medium text-yellow-600">
+                                                    Status: {order.status}
+                                                </p>
+
                                             </div>
                                             <div className="text-right">
                                                 <p className="font-bold text-green-600">+${order.amount.toFixed(2)}</p>
-                                                <p className="text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleDateString()}</p>
+                                                <p className="font-medium">{order.food.title}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Quantity: {order.quantity}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Status: {order.status}
+                                                </p>
+
                                             </div>
                                         </div>
                                     </Card>

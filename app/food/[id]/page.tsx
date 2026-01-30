@@ -61,6 +61,7 @@ export default async function FoodDetailsPage({ params }: { params: { id: string
                                 <p className="text-xs text-muted-foreground">Certified Seller</p>
                             </div>
                         </div>
+
                     </div>
 
                     <div className="pt-4">
@@ -69,12 +70,13 @@ export default async function FoodDetailsPage({ params }: { params: { id: string
                                 You are the seller
                             </Button>
                         ) : (
-                            <form>
-                                {/* Placeholder for order action */}
+                            <Link href={`/order_page?foodId=${item.id}`}>
                                 <Button size="lg" className="w-full">
                                     <ShoppingCart className="mr-2 h-5 w-5" /> Order Now
                                 </Button>
-                            </form>
+                            </Link>
+
+
                         )}
                     </div>
                 </div>
