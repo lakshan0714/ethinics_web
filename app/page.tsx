@@ -4,15 +4,22 @@ import { PrismaClient } from "@prisma/client";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-// Instantiate Prisma Client (best practice is usually a singleton, but this works for MVP)
 const prisma = new PrismaClient();
 
-// This is a Server Component by default in Next.js 14
+// Add this line
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
-    // Fetch food items
     const foodItems = await prisma.foodItem.findMany({
         orderBy: { createdAt: 'desc' },
     });
+
+    // Serialize dates
+    const serializedFoodItems = foodItems.map(item => ({
+        ...item,
+        createdAt: item.createdAt.toISOString(),
+        updatedAt: item.updatedAt.toISOString(),
+    }));
 
     return (
         <main className="flex min-h-screen flex-col">
@@ -52,15 +59,14 @@ export default async function Home() {
                 </div>
 
                 <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                    {foodItems.length === 0 ? (
+                    {serializedFoodItems.length === 0 ? (
                         <div className="col-span-full py-12 text-center text-muted-foreground">
                             <p>No dishes listed yet. Be the first to share your culture!</p>
                         </div>
                     ) : (
-                        foodItems.map((item) => (
+                        serializedFoodItems.map((item) => (
                             <Card key={item.id} className="overflow-hidden">
                                 <div className="aspect-video w-full overflow-hidden">
-                                    {/* We use standard img tag for MVP to avoid Next.js Image config for localhost/uploads */}
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={item.imageUrl || "/placeholder.jpg"}
