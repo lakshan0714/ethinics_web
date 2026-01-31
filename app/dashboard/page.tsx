@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { PrismaClient } from "@prisma/client";
 import Link from "next/link";
 
@@ -16,13 +16,37 @@ export default async function DashboardPage() {
         return <div className="p-10">Please sign in to view dashboard</div>;
     }
 
-    // Get the user's DB record first
-    const user = await prisma.user.findUnique({
+    // Get or create the user's DB record
+    let user = await prisma.user.findUnique({
         where: { clerkId }
     });
 
+    // If user doesn't exist, create them
     if (!user) {
-        return <div className="p-10">User not found. Please sign in again.</div>;
+        const cu = await currentUser();
+        if (!cu) {
+            return <div className="p-10">Unable to fetch user information. Please sign in again.</div>;
+        }
+
+        const email =
+            cu.emailAddresses.find(e => e.id === cu.primaryEmailAddressId)?.emailAddress ||
+            cu.emailAddresses[0]?.emailAddress ||
+            `${cu.id}@placeholder.com`;
+
+        const name =
+            [cu.firstName, cu.lastName].filter(Boolean).join(" ") ||
+            cu.username ||
+            cu.fullName ||
+            "User";
+
+        user = await prisma.user.create({
+            data: {
+                clerkId,
+                email,
+                name,
+                role: "BUYER",
+            }
+        });
     }
 
     // 1. Fetch foods I'm selling
