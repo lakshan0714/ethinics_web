@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 
 const prisma = new PrismaClient();
 
+export const dynamic = 'force-dynamic';
+
 export default async function SellerOrdersPage() {
   const { userId: clerkId } = auth();
   if (!clerkId) notFound();
@@ -46,7 +48,7 @@ export default async function SellerOrdersPage() {
             <p className="text-yellow-600">{order.status}</p>
           </div>
         ))}
-        
+
       </div>
     </div>
   );
