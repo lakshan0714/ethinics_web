@@ -2,7 +2,7 @@
 
 import { currentUser } from "@clerk/nextjs/server";
 import { PrismaClient } from "@prisma/client";
-import { writeFile } from "fs/promises";
+import { mkdir, writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { join } from "path";
@@ -36,7 +36,6 @@ export async function createFoodItem(formData: FormData) {
     const path = join(uploadDir, filename);
 
     try {
-        const { mkdir } = require("fs/promises");
         await mkdir(uploadDir, { recursive: true });
         await writeFile(path, buffer);
     } catch (error) {
