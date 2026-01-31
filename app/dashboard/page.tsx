@@ -8,44 +8,45 @@ import Link from "next/link";
 const prisma = new PrismaClient();
 
 export default async function DashboardPage() {
-    const { userId } = auth();
+    const { userId: clerkId } = auth();
 
-    if (!userId) {
+    if (!clerkId) {
         return <div className="p-10">Please sign in to view dashboard</div>;
+    }
+
+    // Get the user's DB record first
+    const user = await prisma.user.findUnique({
+        where: { clerkId }
+    });
+
+    if (!user) {
+        return <div className="p-10">User not found. Please sign in again.</div>;
     }
 
     // 1. Fetch foods I'm selling
     const myFoods = await prisma.foodItem.findMany({
-        where: { chef: { clerkId: userId } },
+        where: { chefId: user.id }, // ✅ Use DB user id
         orderBy: { createdAt: 'desc' }
     });
 
     // 2. Fetch orders placed (I am the buyer)
     const myOrders = await prisma.order.findMany({
-        where: { buyerId: userId },
+        where: { buyerId: user.id }, // ✅ Use DB user id instead of clerkId
         include: { food: true },
         orderBy: { createdAt: 'desc' }
     });
 
     // 3. Fetch incoming orders (People buying my food)
-    // We find orders where the related food item has my chefId
     const incomingOrders = await prisma.order.findMany({
-        where: {
-            food: {
-                chef: { clerkId: userId }
-            }
-        },
+        where: { sellerId: user.id }, // ✅ Use DB user id
         include: { food: true, buyer: true },
         orderBy: { createdAt: 'desc' }
     });
-
 
     // Calculate Seller Stats
     const totalListings = myFoods.length;
     const totalSalesCount = incomingOrders.length;
     const totalRevenue = incomingOrders.reduce((acc, order) => acc + order.amount, 0);
-
-
 
     return (
         <div className="container py-10">
@@ -87,8 +88,6 @@ export default async function DashboardPage() {
                         </Card>
                     </div>
 
-
-
                     {/* Incoming Orders Table */}
                     <div>
                         <h2 className="mb-4 text-xl font-semibold">Incoming Orders</h2>
@@ -101,8 +100,9 @@ export default async function DashboardPage() {
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className="font-bold">{order.food.title}</p>
-                                                <p className="text-sm text-muted-foreground">Ordered by a User</p>
-                                                <p className="font-bold">{order.food.title}</p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Ordered by: {order.buyer.name}
+                                                </p>
                                                 <p className="text-sm text-muted-foreground">
                                                     Quantity: {order.quantity}
                                                 </p>
@@ -112,18 +112,9 @@ export default async function DashboardPage() {
                                                 <p className="text-xs font-medium text-yellow-600">
                                                     Status: {order.status}
                                                 </p>
-
                                             </div>
                                             <div className="text-right">
                                                 <p className="font-bold text-green-600">+Rs.{order.amount.toFixed(2)}</p>
-                                                <p className="font-medium">{order.food.title}</p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Quantity: {order.quantity}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Status: {order.status}
-                                                </p>
-
                                             </div>
                                         </div>
                                     </Card>
@@ -186,7 +177,7 @@ export default async function DashboardPage() {
                                             <div className="flex items-center gap-4">
                                                 <div className="h-12 w-12 overflow-hidden rounded-md bg-muted">
                                                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                    <img src={order.food.imageUrl || ""} className="h-full w-full object-cover" />
+                                                    <img src={order.food.imageUrl || ""} alt={order.food.title} className="h-full w-full object-cover" />
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">{order.food.title}</p>

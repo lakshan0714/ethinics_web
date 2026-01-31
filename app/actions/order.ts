@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -8,9 +8,9 @@ import { redirect } from "next/navigation";
 const prisma = new PrismaClient();
 
 export async function placeOrder(formData: FormData) {
-    const { userId } = auth();
+    const user = await currentUser();
 
-    if (!userId) {
+    if (!user) {
         redirect("/sign-in");
     }
 
@@ -21,23 +21,37 @@ export async function placeOrder(formData: FormData) {
         throw new Error("Invalid order data");
     }
 
-    // Ensure Buyer exists (MVP Logic cleanup)
-    await prisma.user.upsert({
-        where: { clerkId: userId },
+    // Fetch the food item to get the sellerId (chefId)
+    const food = await prisma.foodItem.findUnique({
+        where: { id: foodId },
+        select: { chefId: true }
+    });
+
+    if (!food) {
+        throw new Error("Food item not found");
+    }
+
+    // Ensure Buyer exists with unique email
+    const buyer = await prisma.user.upsert({
+        where: { clerkId: user.id },
         update: {},
         create: {
-            clerkId: userId,
-            email: "buyer@placeholder.com",
-            name: "Buyer",
+            clerkId: user.id,
+            email: user.emailAddresses[0]?.emailAddress || `${user.id}@placeholder.com`,
+            name: user.firstName || user.fullName || "Buyer",
         }
     });
 
     await prisma.order.create({
         data: {
             foodId,
-            buyerId: userId, // Using clerkId as buyerId linkage
+            buyerId: buyer.id,
+            sellerId: food.chefId,
+            quantity: 1,
+            address: "Default Address",
+            payment: "CASH",
             amount: price,
-            status: "COMPLETED", // Mock payment success
+            status: "COMPLETED",
         }
     });
 

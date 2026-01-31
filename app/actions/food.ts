@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { PrismaClient } from "@prisma/client";
 import { writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
@@ -10,9 +10,9 @@ import { join } from "path";
 const prisma = new PrismaClient();
 
 export async function createFoodItem(formData: FormData) {
-    const { userId } = auth();
+    const user = await currentUser();
 
-    if (!userId) {
+    if (!user) {
         throw new Error("You must be signed in to list a food item.");
     }
 
@@ -45,17 +45,17 @@ export async function createFoodItem(formData: FormData) {
 
     const imageUrl = `/uploads/${filename}`;
 
-    // Ensure User exists (MVP Logic)
+    // Ensure User exists with unique email
     await prisma.user.upsert({
-        where: { clerkId: userId },
+        where: { clerkId: user.id },
         update: {},
         create: {
-            clerkId: userId,
-            email: "placeholder@email.com",
-            name: "Seller",
+            clerkId: user.id,
+            email: user.emailAddresses[0]?.emailAddress || `${user.id}@placeholder.com`,
+            name: user.firstName || user.fullName || "Seller",
+            role: "BUYER", // or "SELLER" if appropriate
         }
     });
-
 
     await prisma.foodItem.create({
         data: {
@@ -64,7 +64,7 @@ export async function createFoodItem(formData: FormData) {
             price,
             imageUrl,
             chef: {
-                connect: { clerkId: userId }
+                connect: { clerkId: user.id }
             }
         },
     });
