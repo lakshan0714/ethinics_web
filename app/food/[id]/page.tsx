@@ -44,7 +44,7 @@ export default async function FoodDetailsPage({ params }: { params: { id: string
                 <div className="space-y-6">
                     <div>
                         <h1 className="text-4xl font-bold">{item.title}</h1>
-                        <p className="mt-2 text-xl font-semibold text-primary">${item.price.toFixed(2)}</p>
+                        <p className="mt-2 text-xl font-semibold text-primary">Rs.{item.price.toFixed(2)}</p>
                     </div>
 
                     <div className="space-y-2">

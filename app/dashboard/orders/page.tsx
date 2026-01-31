@@ -32,7 +32,7 @@ export default async function SellerOrdersPage() {
             <p className="font-semibold">{order.food.title}</p>
             <p>Quantity: {order.quantity}</p>
             <p>Address: {order.address}</p>
-            <p>Total: ${order.amount.toFixed(2)}</p>
+            <p>Total: Rs. {order.amount.toFixed(2)}</p>
             <p className="text-yellow-600">{order.status}</p>
           </div>
         ))}

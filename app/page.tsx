@@ -73,7 +73,7 @@ export default async function Home() {
                                 </CardHeader>
                                 <CardContent>
                                     <p className="line-clamp-2 text-sm text-muted-foreground">{item.description}</p>
-                                    <p className="mt-4 text-lg font-bold text-primary">${item.price.toFixed(2)}</p>
+                                    <p className="mt-4 text-lg font-bold text-primary">Rs.{item.price.toFixed(2)}</p>
                                 </CardContent>
                                 <CardFooter>
                                     <Link href={`/food/${item.id}`} className="w-full">

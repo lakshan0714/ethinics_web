@@ -66,7 +66,7 @@ export default async function DashboardPage() {
                                 <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
+                                <div className="text-2xl font-bold">Rs.{totalRevenue.toFixed(2)}</div>
                             </CardContent>
                         </Card>
                         <Card>
@@ -115,7 +115,7 @@ export default async function DashboardPage() {
 
                                             </div>
                                             <div className="text-right">
-                                                <p className="font-bold text-green-600">+${order.amount.toFixed(2)}</p>
+                                                <p className="font-bold text-green-600">+Rs.{order.amount.toFixed(2)}</p>
                                                 <p className="font-medium">{order.food.title}</p>
                                                 <p className="text-xs text-muted-foreground">
                                                     Quantity: {order.quantity}
@@ -153,7 +153,7 @@ export default async function DashboardPage() {
                                             </div>
                                             <div>
                                                 <h3 className="font-bold">{item.title}</h3>
-                                                <p className="text-sm text-muted-foreground">${item.price.toFixed(2)}</p>
+                                                <p className="text-sm text-muted-foreground">Rs.{item.price.toFixed(2)}</p>
                                             </div>
                                         </div>
                                         <Button variant="outline" size="sm">Edit</Button>
@@ -194,7 +194,7 @@ export default async function DashboardPage() {
                                                 </div>
                                             </div>
                                             <div className="font-bold">
-                                                ${order.amount.toFixed(2)}
+                                                Rs.{order.amount.toFixed(2)}
                                             </div>
                                         </div>
                                     ))}
